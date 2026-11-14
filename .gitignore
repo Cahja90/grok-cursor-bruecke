@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+protokoll.log
+*.pyc
+*.log
+bilder/
+.loop/
+logs/
+ort.json
