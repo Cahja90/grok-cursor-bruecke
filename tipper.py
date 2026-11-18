@@ -656,6 +656,15 @@ def cmd_status(args):
     loop_mod.cmd_status(args)
 
 
+def bei_uia_fehler_nochmal(aktion, pause=0.6):
+    #erster uia-aufruf scheitert oft, der zweite geht. nur vor dem abschicken
+    try:
+        return aktion()
+    except comtypes.COMError:
+        time.sleep(pause)
+        return aktion()
+
+
 def main():
     p = argparse.ArgumentParser(prog="tipper")
     s = p.add_subparsers(dest="cmd", required=True)
@@ -687,7 +696,11 @@ def main():
     args = p.parse_args()
     try:
         zahlen_pruefen(args)
-        globals()["cmd_" + args.cmd](args)
+        befehl = globals()["cmd_" + args.cmd]
+        if args.cmd == "senden":
+            bei_uia_fehler_nochmal(lambda: befehl(args))
+        else:
+            befehl(args)
     except wo.FensterFehler as e:
         print("fehler: %s" % e)
         sys.exit(2)

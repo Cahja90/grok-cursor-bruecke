@@ -67,6 +67,18 @@ class SendenCheck(unittest.TestCase):
         #0.5s nach enter ist das feld oft noch voll, das allein darf nicht mehr als misserfolg gelten
         self.assertFalse(tipper.senden_war_erfolgreich("lang", "lang", False, "x", "x"))
 
+    def test_erster_uia_fehler_wird_wiederholt(self):
+        zaehler = {"n": 0}
+
+        def aktion():
+            zaehler["n"] += 1
+            if zaehler["n"] == 1:
+                raise tipper.comtypes.COMError(-2147220991, "Ein Ereignis konnte keinen Abonnenten aufrufen", None)
+            return "ok"
+
+        self.assertEqual(tipper.bei_uia_fehler_nochmal(aktion, pause=0), "ok")
+        self.assertEqual(zaehler["n"], 2)
+
 
 class StatusRegeln(unittest.TestCase):
     def test_fertig(self):
